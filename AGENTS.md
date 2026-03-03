@@ -27,8 +27,8 @@ before writing any code.
 
 1. Pick an `agent:ready` issue
 2. Create a branch: `git checkout -b issue-<number>-<slug>`
-3. Read the full issue body, then consult the referenced files in
-   `.github/specs/` and `.github/instructions/` for context
+3. Read the full issue body, then consult any files in
+   `.github/specs/` and `.github/instructions/` if they exist
 4. Implement the requirements, respecting all constraints
 5. Write or update tests and ensure they pass
 6. Run all checks (see Verification below)
@@ -112,19 +112,6 @@ Do NOT start an issue until all its dependencies are resolved (merged).
 When a dependency is resolved, the issue receives the `agent:ready`
 label automatically via the agent-monitor workflow.
 
-## Project Context
-
-Read these files before starting work:
-
-| File | Purpose |
-|------|---------|
-| `.github/copilot-instructions.md` | Project-specific coding guidelines |
-| `.github/instructions/system-architecture.instructions.md` | System design, data flows, component diagram |
-| `.github/specs/swe-analysis.md` | Full SWE specification |
-| `.github/specs/business-analysis.md` | Full Business specification |
-| `.github/specs/datasci-analysis.md` | Full Data Science specification |
-| `.github/pull_request_template.md` | PR template — fill this out when opening PRs |
-
 ## Custom Agents
 
 This repository includes specialized agent profiles in `.github/agents/`:
@@ -139,6 +126,19 @@ This repository includes specialized agent profiles in `.github/agents/`:
 
 To use a custom agent, select it from the agent dropdown in your IDE or
 on GitHub.com when assigning work.
+
+## Skills
+
+Agent playbooks in `.github/skills/` provide step-by-step guides for
+common pipeline tasks.  These are loaded on demand when the task matches
+the skill's trigger keywords.
+
+| Skill | When to Use |
+|-------|-------------|
+| `ci-repair-playbook` | CI check fails — diagnose and fix |
+| `issue-implementation` | Starting work on an `agent:ready` issue |
+| `pr-review-checklist` | Reviewing a pull request |
+| `pipeline-debugging` | Pipeline stalled or watchdog alert fired |
 
 ## Model & Reasoning Configuration
 
@@ -156,31 +156,67 @@ Extended thinking helps the agent:
 - Reason about edge cases and error handling
 - Cross-reference specs and architecture docs effectively
 
+## Project Context
+
+Read these files before starting work (if they exist — some are
+project-specific and may not be present in a bare template clone):
+
+| File | Purpose |
+|------|---------|
+| `.github/copilot-instructions.md` | Project-specific coding guidelines |
+| `.github/instructions/system-architecture.instructions.md` | System design, data flows, component diagram |
+| `.github/specs/swe-analysis.md` | Full SWE specification |
+| `.github/specs/business-analysis.md` | Full Business specification |
+| `.github/specs/datasci-analysis.md` | Full Data Science specification |
+| `.github/pull_request_template.md` | PR template — fill this out when opening PRs |
+
 ## Repository Structure
 
-This repository was bootstrapped by [HUGO](https://github.com/microsoft/fde-listen2spec),
-the FDE voice agent.  HUGO listened to a planning meeting, generated
-three specialist analyses, and created this repo with everything an
-AI coding agent needs to start implementing immediately.
+### Template Files (ship with every repo)
 
-Generated content:
+These files are part of the template and are always present:
 
 | Path | What It Contains |
 |------|------------------|
 | `AGENTS.md` | This file — cross-tool agent workflow |
+| `README.md` | Repository overview with pipeline badge |
+| `.github/pull_request_template.md` | Standardised PR format for consistent, reviewable PRs |
+| `.github/automation-policy.yml` | Machine-readable automation boundary |
+| `.github/prompts/repo-assist.md` | Implementation agent prompt |
+| `.github/prompts/pr-review-agent.md` | Review agent prompt |
+| `.github/workflows/auto-dispatch.yml` | Label-driven issue dispatch |
+| `.github/workflows/auto-dispatch-requeue.yml` | Deferred issue requeue |
+| `.github/workflows/repo-assist.yml` | Copilot implementation workflow |
+| `.github/workflows/pr-review-agent.yml` | Copilot review workflow |
+| `.github/workflows/pr-review-submit.yml` | Formal review gate |
+| `.github/workflows/agent-monitor.yml` | Dependency unlock + mark-PR-ready |
+| `.github/workflows/close-issues.yml` | Deterministic issue closing on merge |
+| `.github/workflows/pipeline-status.yml` | Rolling status dashboard |
+| `.github/workflows/ci-repair-router.yml` | Self-healing CI failure loop |
+| `.github/workflows/pipeline-watchdog.yml` | 30-min cron health check |
+| `.github/agents/developer.agent.md` | Primary code implementer agent profile |
+| `.github/agents/test-specialist.agent.md` | Testing-focused agent profile |
+| `.github/agents/implementation-planner.agent.md` | Planning agent profile |
+| `.github/agents/qa-reviewer.agent.md` | QA review agent profile |
+| `.github/agents/orchestrator.agent.md` | Fleet coordinator agent profile |
+| `.github/skills/ci-repair-playbook-SKILL.md` | CI failure diagnosis playbook |
+| `.github/skills/issue-implementation-SKILL.md` | Issue workflow playbook |
+| `.github/skills/pr-review-checklist-SKILL.md` | Structured review playbook |
+| `.github/skills/pipeline-debugging-SKILL.md` | Stall diagnosis playbook |
+
+### Project-Specific Files (generated per project by HUGO)
+
+These files are pushed by the orchestrator during full project bootstrapping.
+They depend on the project's spec analyses and are NOT part of the template:
+
+| Path | What It Contains |
+|------|------------------|
 | `.github/copilot-instructions.md` | Project-specific coding context (architecture, constraints, APIs) |
 | `.github/instructions/system-architecture.instructions.md` | Component diagram, data flows, change impact matrix |
 | `.github/specs/swe-analysis.md` | Full SWE analysis — architecture, ADRs, implementation plan |
 | `.github/specs/business-analysis.md` | Full Business analysis — stakeholders, ROI, feasibility |
 | `.github/specs/datasci-analysis.md` | Full Data Science analysis — metrics, evaluation, data reqs |
-| `.github/pull_request_template.md` | Standardised PR format for consistent, reviewable PRs |
 | `.github/workflows/copilot-setup-steps.yml` | Pre-installs dependencies so agents can build and test immediately |
-| `.github/workflows/agent-monitor.yml` | Auto-unlocks dependent issues when prerequisites are closed |
-| `.github/agents/developer.agent.md` | Primary code implementer agent profile |
-| `.github/agents/test-specialist.agent.md` | Specialised testing agent profile |
-| `.github/agents/implementation-planner.agent.md` | Specialised planning agent profile |
-| `.github/agents/qa-reviewer.agent.md` | Specialised QA review agent profile |
-| `.github/agents/orchestrator.agent.md` | Fleet coordinator agent profile |
 
 Issues on this repository follow a structured template with Problem,
 Files & Scope, Requirements, Acceptance Criteria, Constraints, and
